@@ -12,3 +12,26 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id          Int           @id @default(autoincrement())
+  username    String
+  password    String
+  email       String
+  created_at  DateTime?
+  updated_at  DateTime?
+  transaction Transaction[]
+
+  @@map("user")
+}
+
+model Transaction {
+  id       Int     @id @default(autoincrement())
+  user_id  Int
+  amount   Decimal @db.Decimal(10, 2)
+  category String
+  User     User?   @relation(fields: [userId], references: [id])
+  userId   Int?
+
+  
+}
