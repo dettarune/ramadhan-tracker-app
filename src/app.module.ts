@@ -16,7 +16,7 @@ import { ConfigModule } from '@nestjs/config';
       transports: [new winston.transports.Console()],
   }),
   ConfigModule.forRoot({
-    envFilePath: ['.env'],
+    envFilePath: '.env',
     isGlobal: true
   })
   ],
