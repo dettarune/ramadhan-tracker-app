@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
 import { CreateUserDTO, LoginUserDTO, verifyDTO } from 'src/DTO/user.dto';
@@ -72,6 +72,7 @@ export class UserService {
             }
         } catch (error) {
             console.error(error.message)
+            throw new HttpException(error.message || 'Terjadi kesalahan', HttpStatus.BAD_REQUEST);
         }
 
     }
