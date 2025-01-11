@@ -15,12 +15,12 @@ datasource db {
 
 model User {
   id           Int            @id @default(autoincrement())
-  username     String         @unique 
+  username     String         @unique
   password     String
   email        String
   budget       Int?
-  created_at   DateTime?
-  updated_at   DateTime?
+  created_at   DateTime       @default(now())
+  updated_at   DateTime       @default(now())
   transaction  Transaction[]
   daily_budget Daily_Budget[]
 
@@ -28,23 +28,23 @@ model User {
 }
 
 model Transaction {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   user_id   Int
-  amount    Decimal   @db.Decimal(10, 2)
+  amount    Decimal  @db.Decimal(10, 2)
   category  String
   userId    Int?
-  timestamp DateTime?
-  User      User?     @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+  User      User?    @relation(fields: [userId], references: [id])
 
   @@map("transaction")
 }
 
 model Daily_Budget {
-  id              Int       @id @default(autoincrement())
+  id              Int      @id @default(autoincrement())
   userId          Int
   date            DateTime
   budget          Float
   remainingBudget Float
-  timestamp       DateTime?
-  user            User      @relation(fields: [userId], references: [id])
+  timestamp       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id])
 }

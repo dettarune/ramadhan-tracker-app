@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MailerService } from './nodemailer/nodemailer.service';
 import { RedisService } from './redis/redis.service';
 import { RedisModule } from './redis/redis.module';
+import { JwtService } from '@nestjs/jwt';
 
 
 @Global()
@@ -25,6 +26,6 @@ import { RedisModule } from './redis/redis.module';
   RedisModule,
   ],
   controllers: [],
-  providers: [UserService, PrismaService, MailerService, RedisService],
+  providers: [UserService, PrismaService, MailerService, RedisService,JwtService],
 })
 export class AppModule {}

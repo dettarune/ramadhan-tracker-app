@@ -6,7 +6,7 @@ import Redis from 'ioredis';
         provide: 'RedisClient',
         useFactory: () => new Redis({
             host: process.env.REDIS_HOST,
-            port: +process.env.REDIS_CLIENT,
+            port: +process.env.REDIS_PORT,
         }).on('error', (e) => Logger.error(`Redis Connection Error: ${e}`))
     },
     ],
