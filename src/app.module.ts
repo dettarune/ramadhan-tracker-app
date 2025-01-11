@@ -22,7 +22,7 @@ import { RedisModule } from './redis/redis.module';
     envFilePath: '.env',
     isGlobal: true
   }),
-  RedisModule
+  RedisModule,
   ],
   controllers: [],
   providers: [UserService, PrismaService, MailerService, RedisService],
