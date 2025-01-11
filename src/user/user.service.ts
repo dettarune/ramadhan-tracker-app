@@ -53,7 +53,7 @@ export class UserService {
                 }
             })
 
-            this.mailerService.sendMail(user.email, "KODE VERIFIKASI SEKALI PAKAI", `
+            this.mailerService.sendMail(user.email, `${user.username}, KODE VERIFIKASI SEKALI PAKAI`, `
                     <div style="font-family: Arial, sans-serif; text-align: center;">
                         <h1>Your Verification Code</h1>
                         <p>KODE HANGUS DALAM 5 MENIT</p>  
@@ -65,6 +65,7 @@ export class UserService {
                 `)
 
             this.redisService.setTTL('verif-code', token, 5 * 60 * 1000)
+            console.log(this.redisService.get('verif-code'))
 
             return {
                 message: `Akun Dengan Username ${user.username} Berhasil Didaftarkan, Silahkan Cek Email untuk Verifikasi`,

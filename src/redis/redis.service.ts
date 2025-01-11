@@ -16,6 +16,7 @@ export class RedisService {
     async setTTL(key: string, value: any, ttl: number): Promise<any> {
         try {
             await this.redis.set(key, value, "EX", ttl)
+            return true
         } catch (error) {
             console.error(error.message)
         }
@@ -23,7 +24,7 @@ export class RedisService {
 
     async get(key: string): Promise<any>{
         try {
-            this.redis.get(key)
+            return this.redis.get(key)
         } catch (error) {
             console.error(error.message)
         }
