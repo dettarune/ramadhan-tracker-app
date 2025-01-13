@@ -9,7 +9,7 @@ export class UserController {
     constructor(
         private userService: UserService,
         private redisServ: RedisService
-    ){}
+    ) { }
 
 
     @Post('')
@@ -25,7 +25,8 @@ export class UserController {
             throw new HttpException({
                 statusCode: HttpStatus.BAD_REQUEST,
                 message: error.message,
-            }, HttpStatus.BAD_REQUEST);        }
-        
+            }, HttpStatus.BAD_REQUEST);
+        }
+
     }
 }
