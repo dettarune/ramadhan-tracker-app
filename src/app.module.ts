@@ -8,7 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MailerService } from './nodemailer/nodemailer.service';
 import { RedisService } from './redis/redis.service';
 import { RedisModule } from './redis/redis.module';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 
 
 @Global()
@@ -24,6 +24,11 @@ import { JwtService } from '@nestjs/jwt';
     isGlobal: true
   }),
   RedisModule,
+  JwtModule.register({
+    global: true,
+    secret: process.env.SECRET_JWT,
+    signOptions: { expiresIn: "10d" }
+  }),
   ],
   controllers: [],
   providers: [UserService, PrismaService, MailerService, RedisService,JwtService],
