@@ -67,7 +67,7 @@ export class UserService {
                 `)
 
             this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
-            console.log(this.redisService.get('verif-code'))
+             console.log(this.redisService.get('verif-code'))
 
             return {
                 message: `Akun Dengan Username ${user.username} Berhasil Didaftarkan, Silahkan Cek Email untuk Verifikasi`,
