@@ -5,7 +5,6 @@ export class CreateUserDTO {
     username: string
 
     @IsNotEmpty()
-    @Min(8,{message: 'Password harus memiliki minimal 8 karakter'})
     @Matches(/[A-Z]/, { message: 'Password harus mengandung minimal satu huruf besar' })
     password: string
 
@@ -27,8 +26,7 @@ export class LoginUserDTO {
     email: string
     
     @IsNotEmpty()
-    @IsNumber()
-    token: number
+    token: string
 }
 
 export class recoveryDTO {
