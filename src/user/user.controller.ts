@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
-import { CreateUserDTO, LoginUserDTO, recoveryDTO } from 'src/DTO/user.dto';
+import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/DTO/user.dto';
 import { http } from 'winston';
 import { RedisService } from 'src/redis/redis.service';
 import { Response } from 'express';
@@ -23,7 +23,7 @@ export class UserController {
     async signUp(
         @Body() req: CreateUserDTO
     ) {
-
+        
         try {
             return this.userService.signUp(req)
         } catch (error) {
@@ -33,8 +33,31 @@ export class UserController {
                 message: error.message,
             }, HttpStatus.BAD_REQUEST);
         }
+        
+    }
+    
+
+    @Post('/verify')
+    async verify(
+        @Headers('email') email: emailDTO,
+        @Body() req: verifyTokenDTO
+    ) {
+
+        try {
+           
+            const result = this.userService.verify(email, req)
+            return {
+                message: "Login Success!",
+                token: result
+            }
+
+        } catch (error) {
+            console.log(error)
+            throw new HttpException(error.message, error.BAD_REQUEST)
+        }
 
     }
+
 
     @Post('/login')
     async login(
@@ -65,7 +88,7 @@ export class UserController {
             })
     
             if (!user) {
-                throw new HttpException('User not found', 404); // Jika user tidak ditemukan
+                throw new HttpException('User not found', 404); 
             }
 
             return {
@@ -83,9 +106,10 @@ export class UserController {
         }
     }
 
-    @Post('recovery')
+    
+    @Post('/recovery')
     async recovery(
-        @Body() req: recoveryDTO
+        @Body() req: emailDTO
     ) {
 
         try {
@@ -97,7 +121,18 @@ export class UserController {
             console.log(error)
             throw new HttpException(error.message, error.BAD_REQUEST)
         }
-    }
+    } 
+    
+
+
+
+
+
+
+
+
+
+
 
     @Get('/hitung/persegipanjang/:option/:panjang/:lebar')
     hitung(

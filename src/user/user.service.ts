@@ -1,7 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
-import { CreateUserDTO, LoginUserDTO, recoveryDTO } from 'src/DTO/user.dto';
+import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/DTO/user.dto';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
@@ -67,6 +67,8 @@ export class UserService {
                 `)
 
             this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
+            this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
+
             console.log(this.redisService.get('verif-code'))
 
             return {
@@ -118,7 +120,7 @@ export class UserService {
 
     }
 
-    async recovery(req: recoveryDTO) {
+    async recovery(req: emailDTO) {
 
         try {
 
@@ -152,10 +154,26 @@ export class UserService {
         }
     }
 
-    async forgot() {
+    async verify(email: emailDTO, token: verifyTokenDTO) {
 
+        try {
+            
+            const verifCode = await this.redisService.get(`verif-code-${email}`)
+            const username = await this.redisService.get(`username-${email}`)
+
+            if (token !== verifCode) {
+                throw new HttpException(`Token Invalid`, 401)
+            }
+
+            return await this.jwtService.sign(
+                { username: username, email: email },
+                {secret: process.env.SECRET_JWT,expiresIn: '7d'}
+              );
+
+        } catch (error) {
+            console.error(error.message)
+        }
     }
-
 
 }
 
