@@ -81,6 +81,7 @@ export class UserService {
         }
 
     }
+    
 
     async login(req: LoginUserDTO) {
 
@@ -120,6 +121,7 @@ export class UserService {
 
     }
 
+
     async recovery(req: emailDTO) {
 
         try {
@@ -154,10 +156,11 @@ export class UserService {
         }
     }
 
+
     async verify(email: emailDTO, token: verifyTokenDTO) {
 
         try {
-            
+
             const verifCode = await this.redisService.get(`verif-code-${email}`)
             const username = await this.redisService.get(`username-${email}`)
 
@@ -176,6 +179,8 @@ export class UserService {
     }
 
 }
+
+
 
 @Injectable()
 export class PersegiPanjang {
