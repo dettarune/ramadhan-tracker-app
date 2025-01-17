@@ -67,7 +67,7 @@ export class UserService {
                 `)
 
             this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
-             console.log(this.redisService.get('verif-code'))
+            console.log(this.redisService.get('verif-code'))
 
             return {
                 message: `Akun Dengan Username ${user.username} Berhasil Didaftarkan, Silahkan Cek Email untuk Verifikasi`,
@@ -123,11 +123,11 @@ export class UserService {
         try {
 
             const findEmail = await this.prismaServ.user.findFirst({
-                where: {email: req.email},
-                select: {email:true}
+                where: { email: req.email },
+                select: { email: true }
             })
 
-            if(!findEmail){
+            if (!findEmail) {
                 throw new HttpException(`Email Not Found in our databases`, 404)
             }
 
@@ -144,14 +144,30 @@ export class UserService {
                 </div>
             `)
 
-            this.redisService.setTTL(`verif-code-${req.email}`, token, 5 * 60 * 1000)
+            this.redisService.setTTL(`recovery-code-${req.email}`, token, 5 * 60 * 1000)
 
             return { token }
         } catch (error) {
             console.error(error.message)
         }
+    }
+
+    async forgot() {
+
+    }
 
 
+}
+
+@Injectable()
+export class PersegiPanjang {
+
+    hitungLuas(panjang, lebar) {
+        return panjang * lebar
+    }
+
+    hitungKeliling(panjang, lebar) {
+        return 2 * (panjang + lebar)
     }
 
 }
