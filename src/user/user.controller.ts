@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpException, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpException, HttpStatus, Param, Post, Res, UseFilters } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
 import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/DTO/user.dto';
 import { http } from 'winston';
@@ -7,6 +7,7 @@ import { Response } from 'express';
 import { PassThrough } from 'stream';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { HttpExceptionFilter } from 'src/error/error.filters';
 
 @Controller('/api/users/')
 export class UserController {
@@ -21,21 +22,21 @@ export class UserController {
 
     @Post('')
     async signUp(
-        @Body() req: CreateUserDTO
+        @Body() req: CreateUserDTO,
+        @Res({ passthrough: true }) res: Response
     ) {
-        
+
         try {
-            return this.userService.signUp(req)
+            res.setHeader('email', req.email)
+            return await this.userService.signUp(req)
         } catch (error) {
             console.error(error.message)
-            throw new HttpException({
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: error.message,
-            }, HttpStatus.BAD_REQUEST);
-        }
-        
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus());
+            } else {
+                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+            }        }
     }
-    
 
     @Post('/verify')
     async verify(
@@ -44,18 +45,22 @@ export class UserController {
     ) {
 
         try {
-           
-            const result = this.userService.verify(email, req)
+
+            const result = await this.userService.verify(email, req)
+
             return {
                 message: "Login Success!",
-                token: result
+                token: result.jwtToken  
             }
 
         } catch (error) {
             console.log(error)
-            throw new HttpException(error.message, error.BAD_REQUEST)
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus());
+            } else {
+                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-
     }
 
 
@@ -65,16 +70,15 @@ export class UserController {
         @Res({ passthrough: true }) res: Response
     ) {
         try {
-            const result = await this.userService.login(req)
-            res.header("user-token", result.token)
-            console.log
-            return result
+            res.setHeader('email', req.email)
+            return await this.userService.login(req)
         } catch (error) {
             console.error(error.messagee)
-            throw new HttpException({
-                statusCode: HttpStatus.BAD_REQUEST,
-                message: error.message,
-            }, HttpStatus.BAD_REQUEST);
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus());
+            } else {
+                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
     }
 
@@ -84,11 +88,11 @@ export class UserController {
 
         try {
             const user = await this.prismaServ.user.findUnique({
-                where: {id: parseInt(id, 10) }
+                where: { id: parseInt(id, 10) }
             })
-    
+
             if (!user) {
-                throw new HttpException('User not found', 404); 
+                throw new HttpException('User not found', 404);
             }
 
             return {
@@ -99,14 +103,17 @@ export class UserController {
                     created_at: user.created_at,
                     money: user.budget
                 }
-            }  
+            }
         } catch (error) {
             console.error(error.message)
-            throw new HttpException(error.message, 500)
-        }
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus());
+            } else {
+                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+            }        }
     }
 
-    
+
     @Post('/recovery')
     async recovery(
         @Body() req: emailDTO
@@ -119,10 +126,14 @@ export class UserController {
             }
         } catch (error) {
             console.log(error)
-            throw new HttpException(error.message, error.BAD_REQUEST)
+            if (error instanceof HttpException) {
+                throw new HttpException(error.getResponse(), error.getStatus());
+            } else {
+                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
         }
-    } 
-    
+    }
+
 
 
 

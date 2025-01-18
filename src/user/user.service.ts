@@ -66,57 +66,58 @@ export class UserService {
                     </div>
                 `)
 
-            this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
-            this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
-
-            console.log(this.redisService.get('verif-code'))
+            await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
+            await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
 
             return {
                 message: `Akun Dengan Username ${user.username} Berhasil Didaftarkan, Silahkan Cek Email untuk Verifikasi`,
-                data: user
+                data: user,
+                email: user.email
             }
         } catch (error) {
             console.error(error.message)
-            throw new HttpException(error.message || 'Terjadi kesalahan', HttpStatus.BAD_REQUEST);
+            throw new HttpException(error.message, error.code)
         }
 
     }
-    
+
 
     async login(req: LoginUserDTO) {
 
         try {
-
+            const token = await uuidv4().replace(/\D/g, '').slice(0, 6)
             const user = await this.prismaServ.user.findFirst({
                 where: { username: req.username },
                 select: { username: true, password: true, email: true }
             })
 
-            const isPasswordTrue = bcrypt.compare(req.password, user.password)
+            const isPasswordTrue = await bcrypt.compare(req.password, user.password)
 
             if (!isPasswordTrue) {
                 throw new HttpException(`Username or password is incorrect`, 404);
             }
 
-            const verifCode = await this.redisService.get(`verif-code-${req.email}`)
+            await this.mailerService.sendMail(req.email, `${req.email}, KODE RECOVERY SEKALI PAKAI`, `
+                <div style="font-family: Arial, sans-serif; text-align: center;">
+                    <h1>Your Verification Code</h1>
+                    <p>KODE HANGUS DALAM 5 MENIT</p>  
+                    <p>Use the token below to verify your account:</p>  <br>          
+    
+                    <h1 style="color: #4CAF50;">${token}</h1>
+                    <p>If you didn't request this, you can ignore this email.</p>
+                </div>
+            `)
 
-            if (req.token !== verifCode) {
-                throw new HttpException(`Token Invalid`, 401)
-            }
-
-            const jwtSign = await this.jwtService.sign(
-                { username: req.username, email: req.email },
-                { secret: process.env.SECRET_JWT }
-            )
+            await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
+            await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
 
             return {
-                message: "Login Succes!",
-                token: jwtSign
-            }
+                message: `Succes Send Recovery Token To: ${req.email}`
+            }   
 
         } catch (error) {
             console.error(error.message)
-            throw new HttpException(error.message, 401)
+            throw new HttpException(error.message, error.code)
         }
 
     }
@@ -150,8 +151,10 @@ export class UserService {
 
             this.redisService.setTTL(`recovery-code-${req.email}`, token, 5 * 60 * 1000)
 
-            return { token }
-        } catch (error) {
+            return {
+                message: `Succes Send Recovery Token To: ${req.email}`
+            }       
+         } catch (error) {
             console.error(error.message)
         }
     }
@@ -159,23 +162,33 @@ export class UserService {
 
     async verify(email: emailDTO, token: verifyTokenDTO) {
 
-        try {
+        const verifCode = await this.redisService.get(`verif-code-${email}`)
+        console.log('Redis verifCode:', verifCode);
+        console.log('Received email:', email);
+        console.log('Received token:', token);
 
-            const verifCode = await this.redisService.get(`verif-code-${email}`)
-            const username = await this.redisService.get(`username-${email}`)
+        const username = await this.redisService.get(`username-${email}`)
+        console.log('Received uname:', username);
 
-            if (token !== verifCode) {
-                throw new HttpException(`Token Invalid`, 401)
-            }
 
-            return await this.jwtService.sign(
-                { username: username, email: email },
-                {secret: process.env.SECRET_JWT,expiresIn: '7d'}
-              );
-
-        } catch (error) {
-            console.error(error.message)
+        if (!verifCode || !username) {
+            throw new HttpException("Verification data not found", HttpStatus.NOT_FOUND);
         }
+
+        if (token.token !== verifCode) {
+            throw new HttpException(`Token Invalid`, 401)
+        }
+
+        const jwtToken = await this.jwtService.sign(
+            { username: username, email: email },
+            { secret: process.env.SECRET_JWT, expiresIn: '7d' }
+        );
+
+        await this.redisService.delToken(`verif-code-${email}`)
+        await this.redisService.delToken(`username-${email}`)
+
+        return { jwtToken }
+
     }
 
 }

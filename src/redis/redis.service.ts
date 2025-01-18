@@ -19,8 +19,20 @@ export class RedisService {
             return true
         } catch (error) {
             console.error(error.message)
+            return false; 
         }
     }
+
+    async delToken(key: string): Promise<any> {
+        try {
+            await this.redis.del(key);
+            return true; 
+        } catch (error) {
+            console.error(error.message);
+            return false; 
+        }
+    }
+    
 
     async get(key: string): Promise<any>{
         try {

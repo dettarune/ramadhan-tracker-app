@@ -1,4 +1,4 @@
-import { Contains, IsEmail, IsNotEmpty, IsNumber, Matches, Min } from "class-validator"
+import { Contains, IsEmail, IsNotEmpty, IsNumber, IsString, Matches, Min } from "class-validator"
 import { verify } from "crypto"
 
 export class CreateUserDTO {
@@ -26,8 +26,6 @@ export class LoginUserDTO {
     @IsEmail()
     email: string
     
-    @IsNotEmpty()
-    token: string
 }
 
 export class emailDTO {
@@ -37,6 +35,7 @@ export class emailDTO {
 
 export class verifyTokenDTO {
     @IsNotEmpty({ message: 'Token Tidak Boleh Kosong' })
-    token: number
+    @IsString()
+    token: string
 }
 
