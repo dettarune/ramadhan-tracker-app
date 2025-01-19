@@ -188,7 +188,6 @@ export class UserService {
         await this.redisService.delToken(`username-${email}`)
 
         return { jwtToken }
-
     }
 
 }
