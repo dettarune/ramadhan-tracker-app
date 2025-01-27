@@ -5,9 +5,11 @@ CREATE TABLE `user` (
     `password` VARCHAR(191) NOT NULL,
     `email` VARCHAR(191) NOT NULL,
     `budget` INTEGER NULL,
-    `created_at` DATETIME(3) NULL,
-    `updated_at` DATETIME(3) NULL,
+    `created_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updated_at` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    UNIQUE INDEX `user_username_key`(`username`),
+    UNIQUE INDEX `user_email_key`(`email`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -18,7 +20,7 @@ CREATE TABLE `transaction` (
     `amount` DECIMAL(10, 2) NOT NULL,
     `category` VARCHAR(191) NOT NULL,
     `userId` INTEGER NULL,
-    `timestamp` DATETIME(3) NULL,
+    `timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -30,7 +32,7 @@ CREATE TABLE `Daily_Budget` (
     `date` DATETIME(3) NOT NULL,
     `budget` DOUBLE NOT NULL,
     `remainingBudget` DOUBLE NOT NULL,
-    `timestamp` DATETIME(3) NULL,
+    `timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

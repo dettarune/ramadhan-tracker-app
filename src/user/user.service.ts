@@ -97,7 +97,7 @@ export class UserService {
                 throw new HttpException(`Username or password is incorrect`, 404);
             }
 
-            await this.mailerService.sendMail(req.email, `${req.email}, KODE RECOVERY SEKALI PAKAI`, `
+            await this.mailerService.sendMail(user.email, `${user.email}, KODE RECOVERY SEKALI PAKAI`, `
                 <div style="font-family: Arial, sans-serif; text-align: center;">
                     <h1>Your Verification Code</h1>
                     <p>KODE HANGUS DALAM 5 MENIT</p>  
@@ -112,7 +112,8 @@ export class UserService {
             await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
 
             return {
-                message: `Succes Send Recovery Token To: ${req.email}`
+                message: `Succes Send Verif Token To: ${user.email}`,
+                email: user.email
             }   
 
         } catch (error) {

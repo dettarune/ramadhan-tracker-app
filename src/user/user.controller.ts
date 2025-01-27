@@ -70,8 +70,9 @@ export class UserController {
         @Res({ passthrough: true }) res: Response
     ) {
         try {
-            res.setHeader('email', req.email)
-            return await this.userService.login(req)
+            const result = await this.userService.login(req)
+            res.setHeader('email', result.email)
+            return result
         } catch (error) {
             console.error(error.messagee)
             if (error instanceof HttpException) {

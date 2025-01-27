@@ -22,9 +22,6 @@ export class LoginUserDTO {
     @IsNotEmpty()
     password: string
 
-    @IsNotEmpty()
-    @IsEmail()
-    email: string
     
 }
 
