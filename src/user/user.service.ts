@@ -58,23 +58,13 @@ export class UserService {
                 }
             })
 
-            await this.mailerService.sendMail(user.email, `${user.username}, KODE VERIFIKASI SEKALI PAKAI`, `
-                    <div style="font-family: Arial, sans-serif; text-align: center;">
-                        <h1>Your Verification Code</h1>
-                        <p>KODE HANGUS DALAM 5 MENIT</p>  
-                        <p>Use the token below to verify your account:</p>  <br>          
-
-                        <h1 style="color: #4CAF50;">${token}</h1>
-                        <p>If you didn't request this, you can ignore this email.</p>
-                    </div>
-                `)
+            await this.mailerService.sendMail(user.email, `${user.email}, KODE RECOVERY SEKALI PAKAI`, token)
 
             await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
             await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
 
             return {
-                message: `Akun Dengan Username ${user.username} Berhasil Didaftarkan, Silahkan Cek Email untuk Verifikasi`,
-                data: user,
+                user,
                 email: user.email
             }
         } catch (error) {
@@ -100,16 +90,7 @@ export class UserService {
                 throw new HttpException(`Username or password is incorrect`, 404);
             
 
-            await this.mailerService.sendMail(user.email, `${user.email}, KODE RECOVERY SEKALI PAKAI`, `
-                <div style="font-family: Arial, sans-serif; text-align: center;">
-                    <h1>Your Verification Code</h1>
-                    <p>KODE HANGUS DALAM 5 MENIT</p>  
-                    <p>Use the token below to verify your account:</p>  <br>          
-    
-                    <h1 style="color: #4CAF50;">${token}</h1>
-                    <p>If you didn't request this, you can ignore this email.</p>
-                </div>
-            `)
+            await this.mailerService.sendMail(user.email, `${user.username}, KODE RECOVERY SEKALI PAKAI`, token)
 
             await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
             await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
@@ -142,16 +123,8 @@ export class UserService {
 
             const token = await uuidv4().replace(/\D/g, '').slice(0, 6)
 
-            await this.mailerService.sendMail(req.email, `${req.email}, KODE RECOVERY SEKALI PAKAI`, `
-                <div style="font-family: Arial, sans-serif; text-align: center;">
-                    <h1>Your Verification Code</h1>
-                    <p>KODE HANGUS DALAM 5 MENIT</p>  
-                    <p>Use the token below to verify your account:</p>  <br>          
-    
-                    <h1 style="color: #4CAF50;">${token}</h1>
-                    <p>If you didn't request this, you can ignore this email.</p>
-                </div>
-            `)
+            await this.mailerService.sendMail(req.email, `${req.email}, KODE RECOVERY SEKALI PAKAI`, token)
+
 
             this.redisService.setTTL(`recovery-code-${req.email}`, token, 5 * 60 * 1000)
 

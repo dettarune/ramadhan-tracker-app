@@ -29,14 +29,19 @@ export class UserController {
         try {
             res.setHeader('email', req.email)
             res.status(201)
-            return await this.userService.signUp(req)
+            const result = await this.userService.signUp(req)
+            return {
+                data: result,
+                message: `Sukses membuat akun dengan username ${result.user.username}`
+            }
         } catch (error) {
             console.error(error.message)
             if (error instanceof HttpException) {
                 throw new HttpException(error.getResponse(), error.getStatus());
             } else {
                 throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }        }
+            }
+        }
     }
 
     @Post('/verify')
@@ -46,12 +51,10 @@ export class UserController {
     ) {
 
         try {
-
             const result = await this.userService.verify(email, req)
-
             return {
                 message: "Login Success!",
-                token: result.jwtToken  
+                token: result.jwtToken
             }
 
         } catch (error) {
@@ -73,7 +76,9 @@ export class UserController {
         try {
             const result = await this.userService.login(req)
             res.setHeader('email', result.email)
-            return result
+            return {
+                message: `Succes Send Verif Token To: ${result.email}`
+            }
         } catch (error) {
             console.error(error.messagee)
             if (error instanceof HttpException) {
@@ -98,12 +103,8 @@ export class UserController {
             }
 
             return {
-                userInfo: {
-                    username: user.username,
-                    password: user.password,
-                    email: user.email,
-                    created_at: user.created_at,
-                    money: user.budget
+                data: {
+                    user
                 }
             }
         } catch (error) {
@@ -112,7 +113,8 @@ export class UserController {
                 throw new HttpException(error.getResponse(), error.getStatus());
             } else {
                 throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }        }
+            }
+        }
     }
 
 
