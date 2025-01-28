@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Res, UseFilters } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
-import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/DTO/user.dto';
+import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/user/DTO/user.dto';
 import { http } from 'winston';
 import { RedisService } from 'src/redis/redis.service';
 import { Response } from 'express';
@@ -47,14 +47,16 @@ export class UserController {
     @Post('/verify')
     async verify(
         @Headers('email') email: emailDTO,
-        @Body() req: verifyTokenDTO
+        @Body() req: verifyTokenDTO,
+        @Res({ passthrough: true }) res: Response
+
     ) {
 
         try {
             const result = await this.userService.verify(email, req)
+            res.cookie('Authorization', result.jwtToken)
             return {
-                message: "Login Success!",
-                token: result.jwtToken
+                message: "Login Success!"
             }
 
         } catch (error) {

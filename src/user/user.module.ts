@@ -12,7 +12,7 @@ import { RedisModule } from 'src/redis/redis.module';
     JwtModule.register({
       global: true,
       secret: process.env.SECRET_JWT,
-      signOptions: { expiresIn: "10d" }
+      signOptions: { expiresIn: "7d" }
     })
   ],
   controllers: [UserController],

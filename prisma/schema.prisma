@@ -45,9 +45,10 @@ model Products {
   description String
   price       Decimal
   stock       Int
-  image       String
+  image       String?
   userId      Int?
-  updated_at  DateTime @default(now())
+  created_at  DateTime @default(now())
+  updated_at DateTime? 
 
   User User? @relation(fields: [userId], references: [id])
 

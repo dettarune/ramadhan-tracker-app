@@ -9,6 +9,8 @@ import { MailerService } from './nodemailer/nodemailer.service';
 import { RedisService } from './redis/redis.service';
 import { RedisModule } from './redis/redis.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
+import { ProductsService } from './products/products.service';
+import { ProductsController } from './products/products.controller';
 
 
 @Global()
@@ -30,7 +32,7 @@ import { JwtModule, JwtService } from '@nestjs/jwt';
     signOptions: { expiresIn: "10d" }
   }),
   ],
-  controllers: [],
-  providers: [UserService, PrismaService, MailerService, RedisService,JwtService],
+  controllers: [ProductsController],
+  providers: [UserService, PrismaService, MailerService, RedisService,JwtService, ProductsService],
 })
 export class AppModule {}
