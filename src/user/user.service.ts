@@ -38,11 +38,14 @@ export class UserService {
             })
 
             if (taken) {
-                if (taken.username === req.username) {
-                    throw new HttpException(`Username sudah terdaftar`, 401)
-                } else if (taken.email === req.email) {
-                    throw new HttpException(`Email sudah terdaftar`, 409)
-                }
+                const errorMessage =
+                    taken.username === req.username
+                        ? 'Username sudah terdaftar'
+                        : 'Email sudah terdaftar';
+            
+                const errorCode = taken.username === req.username ? 401 : 409;
+            
+                throw new HttpException(errorMessage, errorCode);
             }
 
             const token = uuidv4().replace(/\D/g, '').slice(0, 6)
@@ -93,9 +96,9 @@ export class UserService {
 
             const isPasswordTrue = await bcrypt.compare(req.password, user.password)
 
-            if (!isPasswordTrue) {
+            if (!isPasswordTrue) 
                 throw new HttpException(`Username or password is incorrect`, 404);
-            }
+            
 
             await this.mailerService.sendMail(user.email, `${user.email}, KODE RECOVERY SEKALI PAKAI`, `
                 <div style="font-family: Arial, sans-serif; text-align: center;">
@@ -172,13 +175,13 @@ export class UserService {
         console.log('Received uname:', username);
 
 
-        if (!verifCode || !username) {
+        if (!verifCode || !username) 
             throw new HttpException("Verification data not found", HttpStatus.NOT_FOUND);
-        }
+        
 
-        if (token.token !== verifCode) {
+        if (token.token !== verifCode) 
             throw new HttpException(`Token Invalid`, 401)
-        }
+        
 
         const jwtToken = await this.jwtService.sign(
             { username: username, email: email },

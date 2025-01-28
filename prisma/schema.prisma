@@ -14,15 +14,16 @@ datasource db {
 }
 
 model User {
-  id           Int            @id @default(autoincrement())
-  username     String         @unique
-  password     String
-  email        String @unique
-  budget       Int?
-  created_at   DateTime       @default(now())
-  updated_at   DateTime       @default(now())
-  transaction  Transaction[]
-  daily_budget Daily_Budget[]
+  id          Int           @id @default(autoincrement())
+  username    String        @unique
+  password    String
+  email       String        @unique
+  budget      Int?
+  created_at  DateTime      @default(now())
+  updated_at  DateTime      @default(now())
+  role        String?
+  transaction Transaction[]
+  product     Products[]
 
   @@map("user")
 }
@@ -31,7 +32,6 @@ model Transaction {
   id        Int      @id @default(autoincrement())
   user_id   Int
   amount    Decimal  @db.Decimal(10, 2)
-  category  String
   userId    Int?
   timestamp DateTime @default(now())
   User      User?    @relation(fields: [userId], references: [id])
@@ -39,12 +39,17 @@ model Transaction {
   @@map("transaction")
 }
 
-model Daily_Budget {
-  id              Int      @id @default(autoincrement())
-  userId          Int
-  date            DateTime
-  budget          Float
-  remainingBudget Float
-  timestamp       DateTime @default(now())
-  user            User     @relation(fields: [userId], references: [id])
+model Products {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Decimal
+  stock       Int
+  image       String
+  userId      Int?
+  updated_at  DateTime @default(now())
+
+  User User? @relation(fields: [userId], references: [id])
+
+  @@map("Products")
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpException, HttpStatus, Param, Post, Res, UseFilters } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Res, UseFilters } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
 import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/DTO/user.dto';
 import { http } from 'winston';
@@ -28,6 +28,7 @@ export class UserController {
 
         try {
             res.setHeader('email', req.email)
+            res.status(201)
             return await this.userService.signUp(req)
         } catch (error) {
             console.error(error.message)
