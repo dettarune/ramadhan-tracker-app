@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
@@ -29,14 +29,20 @@ export class ProductsService {
 
         async updateProduct(reqProduct: updateProductDTO, id: number): Promise<any> {
             try {
-
-                return await this.prismaServ.products.update({
+                const product = await this.prismaServ.products.update({
                     where: {id: id},
                     data: {
                         ...reqProduct,
                         updated_at: new Date()
                     }
                 });
+
+                if(!product)
+                    throw new HttpException(`Product Not Found`, 404)
+
+                console.log(product)
+
+                return product
             } catch (error) {
                 console.log(error.message);
             }
@@ -44,9 +50,14 @@ export class ProductsService {
         
         async delProduct(id:number): Promise<any> {
             try {
-                return await this.prismaServ.products.delete({
+                const product = await this.prismaServ.products.delete({
                     where: {id}
                 })
+
+                if(!product)
+                    throw new HttpException(`Product Not Found`, 404)
+
+                return product
             } catch (error) {
                 console.log(error.message);
             }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Res, UseFilters } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
 import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/user/DTO/user.dto';
 import { http } from 'winston';
@@ -8,6 +8,7 @@ import { PassThrough } from 'stream';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HttpExceptionFilter } from 'src/error/error.filters';
+import { AuthGuard } from 'src/guard/user/user.guard';
 
 @Controller('/api/users/')
 export class UserController {
@@ -54,7 +55,8 @@ export class UserController {
 
         try {
             const result = await this.userService.verify(email, req)
-            res.cookie('Authorization', result.jwtToken)
+
+            res.cookie('Authorization', result.jwtToken, { httpOnly: true, secure: true, maxAge: 604800000 })
             return {
                 message: "Login Success!"
             }
@@ -69,6 +71,26 @@ export class UserController {
         }
     }
 
+    @Delete('/logout')
+    @UseGuards(AuthGuard)
+    async logOut(
+        @Res({ passthrough: true }) res: Response
+    ): Promise<any> {
+        try {
+            res.clearCookie('Authorization', { httpOnly: true, secure: true, path: '/', });
+
+            return res.status(HttpStatus.OK).json({
+                message: 'User successfully logged out',
+              });
+
+        } catch (error) {
+            console.log(error.message)
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
+                message: 'Internal Server Error',
+              });
+        }
+    }
+
 
     @Post('/login')
     async login(
@@ -79,7 +101,7 @@ export class UserController {
             const result = await this.userService.login(req)
             res.setHeader('email', result.email)
             return {
-                message: `Succes Send Verif Token To: ${result.email}`
+                message: `Succes Send Verif Token To: ${result.email}, Please Check Your Email`
             }
         } catch (error) {
             console.error(error.messagee)
@@ -90,6 +112,10 @@ export class UserController {
             }
         }
     }
+
+
+
+    
 
 
     @Get('/:id')

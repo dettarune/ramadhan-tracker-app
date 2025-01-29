@@ -21,7 +21,7 @@ model User {
   budget      Int?
   created_at  DateTime      @default(now())
   updated_at  DateTime      @default(now())
-  role        String?
+  role        String?       @default("wargaSipil")
   transaction Transaction[]
   product     Products[]
 
@@ -40,15 +40,15 @@ model Transaction {
 }
 
 model Products {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   description String
-  price       Decimal
+  price       Decimal@db.Decimal(10, 2)
   stock       Int
   image       String?
   userId      Int?
-  created_at  DateTime @default(now())
-  updated_at DateTime? 
+  created_at  DateTime  @default(now())
+  updated_at  DateTime?
 
   User User? @relation(fields: [userId], references: [id])
 

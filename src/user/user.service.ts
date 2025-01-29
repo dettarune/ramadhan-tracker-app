@@ -63,6 +63,7 @@ export class UserService {
             await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
             await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
             await this.redisService.setTTL(`role-${user.email}`, user.role, 5 * 60 * 1000)
+            await this.redisService.setTTL(`id-${user.email}`, user.id, 5 * 60 * 1000)
 
             return {
                 user,
@@ -82,7 +83,7 @@ export class UserService {
             const token = await uuidv4().replace(/\D/g, '').slice(0, 6)
             const user = await this.prismaServ.user.findFirst({
                 where: { username: req.username },
-                select: { username: true, password: true, email: true, role: true }
+                select: { username: true, password: true, email: true, role: true, id: true }
             })
 
             const isPasswordTrue = await bcrypt.compare(req.password, user.password)
@@ -97,6 +98,8 @@ export class UserService {
             await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
             await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
             await this.redisService.setTTL(`role-${user.email}`, user.role, 5 * 60 * 1000)
+            await this.redisService.setTTL(`id-${user.email}`, user.id, 5 * 60 * 1000)
+
 
             return {
                 message: `Succes Send Verif Token To: ${user.email}`,
@@ -145,26 +148,43 @@ export class UserService {
         const verifCode = await this.redisService.get(`verif-code-${email}`)
         const username = await this.redisService.get(`username-${email}`)
         const role = await this.redisService.get(`role-${email}`)
+        const id = await this.redisService.get(`id-${email}`)
 
-        console.log('Redis verifCode:', verifCode);
-        console.log('Received email:', email);
-        console.log('Received token:', token);
-        console.log('Received uname:', username);
+
+        if(!token)
+            throw new HttpException(`User Not Found`, 404)
+
 
         if (token.token !== verifCode) 
             throw new HttpException(`Token Invalid`, 401)
         
 
         const jwtToken = await this.jwtService.sign(
-            { username: username, email: email, role: role },
+            { id: id, username: username, email: email, role: role },
             { secret: process.env.SECRET_JWT, expiresIn: '7d' }
         );
 
         await this.redisService.delToken(`verif-code-${email}`)
         await this.redisService.delToken(`username-${email}`)
         await this.redisService.delToken(`role-${email}`)
+        await this.redisService.delToken(`id-${email}`)
 
         return { jwtToken }
+    }
+
+    async logOut(reqUser: any): Promise<any>{
+        try {
+            const user = this.prismaServ.user.findUnique({
+                where: {username: reqUser}, select:{username:true}
+            })
+
+            if(!user)
+                throw new HttpException(`User Not Found`, 404)
+
+
+        } catch (error) {
+            console.log(`${error.message}`)
+        }
     }
 
 }
