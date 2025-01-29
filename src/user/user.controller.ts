@@ -1,9 +1,9 @@
-import { Body, Controller, Delete, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Res, UseFilters, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
 import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/user/DTO/user.dto';
 import { http } from 'winston';
 import { RedisService } from 'src/redis/redis.service';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { PassThrough } from 'stream';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -11,6 +11,7 @@ import { HttpExceptionFilter } from 'src/error/error.filters';
 import { AuthGuard } from 'src/guard/user/user.guard';
 
 @Controller('/api/users/')
+@UseFilters(HttpExceptionFilter)
 export class UserController {
     constructor(
         private userService: UserService,
@@ -37,11 +38,6 @@ export class UserController {
             }
         } catch (error) {
             console.error(error.message)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 
@@ -63,13 +59,23 @@ export class UserController {
 
         } catch (error) {
             console.log(error)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
+
+
+    @Get('/me')
+    async getInfoMe(
+        @Req() { user }: Request
+    ) {
+        try {
+           
+
+
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
 
     @Delete('/logout')
     @UseGuards(AuthGuard)
@@ -105,17 +111,12 @@ export class UserController {
             }
         } catch (error) {
             console.error(error.messagee)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 
 
 
-    
+
 
 
     @Get('/:id')
@@ -137,11 +138,6 @@ export class UserController {
             }
         } catch (error) {
             console.error(error.message)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 
@@ -158,11 +154,6 @@ export class UserController {
             }
         } catch (error) {
             console.log(error)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 

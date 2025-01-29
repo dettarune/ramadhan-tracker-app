@@ -113,6 +113,25 @@ export class UserService {
 
     }
 
+    async getInfoMe(reqUser: any) {
+
+        try {
+         
+            const user = await this.prismaServ.user.findUnique({
+                where: {username: reqUser},
+            })
+
+            if(!user)
+                throw new HttpException(`User Not Found`, 404)
+
+            return user
+        } catch (error) {
+            console.error(error.message)
+            throw new HttpException(error.message, error.code)
+        }
+
+    }
+
 
     async recovery(req: emailDTO) {
 

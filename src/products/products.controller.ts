@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, HttpException, HttpStatus, Param, Patch, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, HttpException, HttpStatus, Param, Patch, Post, Req, UseFilters, UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
@@ -6,8 +6,10 @@ import { CreateProductDTO, updateProductDTO } from './DTO/products.dto';
 import { ProductsService } from './products.service';
 import { AuthGuard } from 'src/guard/user/user.guard';
 import { Request } from 'express';
+import { HttpExceptionFilter } from 'src/error/error.filters';
 
 @Controller('/api/products')
+@UseFilters(HttpExceptionFilter)
 export class ProductsController {
     constructor(
         private prismaServ: PrismaService,
@@ -20,11 +22,10 @@ export class ProductsController {
     
     @Post('')
     @UseGuards(AuthGuard)
-    async addProduct(@Body() reqProduct: CreateProductDTO, @Req() req: any): Promise<any> {
+    async addProduct(@Body() reqProduct: CreateProductDTO, @Req() { user }: Request): Promise<any> {
         try {
-            const user = req['user'] 
         
-            const { id, username, email, role } = user;
+            const { id } = user;
             const result = await this.productServ.addProduct(reqProduct, parseInt(id))
 
             return {
@@ -33,11 +34,6 @@ export class ProductsController {
             }
         } catch (error) {
             console.log(error.message)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 
@@ -54,11 +50,6 @@ export class ProductsController {
 
         } catch (error) {
             console.log(error.message)
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 
@@ -69,11 +60,6 @@ export class ProductsController {
             return await this.productServ.delProduct(id)
         } catch (error) {
             console.log(error.message);
-            if (error instanceof HttpException) {
-                throw new HttpException(error.getResponse(), error.getStatus());
-            } else {
-                throw new HttpException('Internal Server Error', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
         }
     }
 }
