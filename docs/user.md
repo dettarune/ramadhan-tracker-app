@@ -143,7 +143,7 @@ clearCookie key:"Authorization"
 }
 ```
 
-Response Body (Failed)
+Response Body (Failed) 
 
 ```json
 {
