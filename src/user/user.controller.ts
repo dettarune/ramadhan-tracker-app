@@ -33,8 +33,7 @@ export class UserController {
             res.status(201)
             const result = await this.userService.signUp(req)
             return {
-                data: result,
-                message: `Sukses membuat akun dengan username ${result.user.username}`
+                message: `Sukses membuat akun dengan username ${result.username}`
             }
         } catch (error) {
             console.error(error.message)
@@ -77,7 +76,10 @@ export class UserController {
 
             return {
                 message: `Succes Get ${username}'s Info!`,
-                data: result
+                data: {
+                    ...result.user,
+                    "usiaAkun": `${result.usiaAkun} hari`
+                }
             }
 
         } catch (error) {
@@ -86,7 +88,7 @@ export class UserController {
     }
 
 
-    @Delete('/logout')
+    @Delete('/me')
     @UseGuards(AuthGuard)
     async logOut(
         @Res({ passthrough: true }) res: Response

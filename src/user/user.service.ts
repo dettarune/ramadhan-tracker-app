@@ -66,8 +66,8 @@ export class UserService {
             await this.redisService.setTTL(`id-${user.email}`, user.id, 5 * 60 * 1000)
 
             return {
-                user,
-                email: user.email
+                email: user.email,
+                username: user.username
             }
         } catch (error) {
             console.error(error.message)
@@ -124,11 +124,18 @@ export class UserService {
             if (!user)
                 throw new HttpException(`User Not Found`, 404)
 
-            return user
+            const createdAt = new Date(user.created_at);
+            const now = new Date();
+
+            const usia = now.getTime() - createdAt.getTime();
+
+            const usiaAkun = Math.floor(usia / (1000 * 60 * 60 * 24));
+
+            return { user, usiaAkun: usiaAkun };
         } catch (error) {
             console.error(error.message)
-            throw new HttpException(error.message, error.code)  
-         }
+            throw new HttpException(error.message, error.code)
+        }
 
     }
 
@@ -141,17 +148,17 @@ export class UserService {
     //                     updated_at: new Date()
     //                 }
     //             });
-    
+
     //             if (!product)
     //                 throw new HttpException(`Product Not Found`, 404)
-    
+
     //             console.log(product)
-    
+
     //             return product
     //         } catch (error) {
     //             console.log(error.message);
     //             throw new HttpException(error.message, error.code)
-    
+
     //         }
     //     }
 
