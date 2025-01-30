@@ -1,10 +1,10 @@
 # User API Spec
 
-## Register User
+# Register User
 
 Endpoint : POST /api/users
 
-# Request Body :
+### Request Body :
 
 ```json
 {
@@ -30,7 +30,7 @@ Endpoint : POST /api/users
 }
 ```
 
-## Login User
+# Login User
 
 Endpoint : POST /api/users/login
 
@@ -61,7 +61,7 @@ header: 'email'
 }
 ```
 
-## Verify User
+# Verify User
 
 Endpoint: POST /api/users/verify
 
@@ -91,7 +91,7 @@ Return Cookies key:"Authorization" val:"jwtTokenSession"
 ```
 
 
-## Get User Info
+# Get User Info
 
 Endpoint : GET /api/users/me
 
@@ -127,7 +127,7 @@ Cookies :
 ```
 
 
-## Logout User
+# Logout User
 
 Endpoint : DELETE /api/users/me
 
