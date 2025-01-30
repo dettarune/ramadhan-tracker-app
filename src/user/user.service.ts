@@ -42,9 +42,9 @@ export class UserService {
                     taken.username === req.username
                         ? 'Username sudah terdaftar'
                         : 'Email sudah terdaftar';
-            
+
                 const errorCode = taken.username === req.username ? 401 : 409;
-            
+
                 throw new HttpException(errorMessage, errorCode);
             }
 
@@ -88,9 +88,9 @@ export class UserService {
 
             const isPasswordTrue = await bcrypt.compare(req.password, user.password)
 
-            if (!isPasswordTrue) 
+            if (!isPasswordTrue)
                 throw new HttpException(`Username or password is incorrect`, 404);
-            
+
 
             await this.mailerService.sendMail(user.email, `${user.username}, KODE RECOVERY SEKALI PAKAI`, token)
 
@@ -104,7 +104,7 @@ export class UserService {
             return {
                 message: `Succes Send Verif Token To: ${user.email}`,
                 email: user.email
-            }   
+            }
 
         } catch (error) {
             console.error(error.message)
@@ -113,25 +113,47 @@ export class UserService {
 
     }
 
-    async getInfoMe(reqUser: any) {
+    async getInfoMe(username: any) {
 
         try {
-         
+
             const user = await this.prismaServ.user.findUnique({
-                where: {username: reqUser},
+                where: { username },
             })
 
-            if(!user)
+            if (!user)
                 throw new HttpException(`User Not Found`, 404)
 
             return user
         } catch (error) {
             console.error(error.message)
-            throw new HttpException(error.message, error.code)
-        }
+            throw new HttpException(error.message, error.code)  
+         }
 
     }
 
+    // async updateUser(reqProduct: updateProductDTO, id: number): Promise<any> {
+    //         try {
+    //             const product = await this.prismaServ.products.update({
+    //                 where: { id: id },
+    //                 data: {
+    //                     ...reqProduct,
+    //                     updated_at: new Date()
+    //                 }
+    //             });
+    
+    //             if (!product)
+    //                 throw new HttpException(`Product Not Found`, 404)
+    
+    //             console.log(product)
+    
+    //             return product
+    //         } catch (error) {
+    //             console.log(error.message);
+    //             throw new HttpException(error.message, error.code)
+    
+    //         }
+    //     }
 
     async recovery(req: emailDTO) {
 
@@ -155,55 +177,64 @@ export class UserService {
 
             return {
                 message: `Succes Send Recovery Token To: ${req.email}`
-            }       
-         } catch (error) {
+            }
+        } catch (error) {
             console.error(error.message)
+            throw new HttpException(error.message, error.code)
+
         }
     }
 
 
     async verify(email: emailDTO, token: verifyTokenDTO) {
-
-        const verifCode = await this.redisService.get(`verif-code-${email}`)
-        const username = await this.redisService.get(`username-${email}`)
-        const role = await this.redisService.get(`role-${email}`)
-        const id = await this.redisService.get(`id-${email}`)
-
-
-        if(!token)
-            throw new HttpException(`User Not Found`, 404)
-
-
-        if (token.token !== verifCode) 
-            throw new HttpException(`Token Invalid`, 401)
-        
-
-        const jwtToken = await this.jwtService.sign(
-            { id: id, username: username, email: email, role: role },
-            { secret: process.env.SECRET_JWT, expiresIn: '7d' }
-        );
-
-        await this.redisService.delToken(`verif-code-${email}`)
-        await this.redisService.delToken(`username-${email}`)
-        await this.redisService.delToken(`role-${email}`)
-        await this.redisService.delToken(`id-${email}`)
-
-        return { jwtToken }
-    }
-
-    async logOut(reqUser: any): Promise<any>{
         try {
-            const user = this.prismaServ.user.findUnique({
-                where: {username: reqUser}, select:{username:true}
-            })
+            const verifCode = await this.redisService.get(`verif-code-${email}`)
+            const username = await this.redisService.get(`username-${email}`)
+            const role = await this.redisService.get(`role-${email}`)
+            const id = await this.redisService.get(`id-${email}`)
 
-            if(!user)
+
+            if (!token)
                 throw new HttpException(`User Not Found`, 404)
 
 
+            if (token.token !== verifCode)
+                throw new HttpException(`Token Invalid`, 401)
+
+
+            const jwtToken = await this.jwtService.sign(
+                { id: id, username: username, email: email, role: role },
+                { secret: process.env.SECRET_JWT, expiresIn: '7d' }
+            );
+
+            await this.redisService.delToken(`verif-code-${email}`)
+            await this.redisService.delToken(`username-${email}`)
+            await this.redisService.delToken(`role-${email}`)
+            await this.redisService.delToken(`id-${email}`)
+
+            return { jwtToken }
         } catch (error) {
-            console.log(`${error.message}`)
+            console.error(error.message)
+            throw new HttpException(error.message, error.code)
+
         }
+
+    }
+
+    async logOut(reqUser: any): Promise<any> {
+        try {
+            const user = this.prismaServ.user.findUnique({
+                where: { username: reqUser }, select: { username: true }
+            })
+
+            if (!user)
+                throw new HttpException(`User Not Found`, 404)
+        } catch (error) {
+            console.error(error.message)
+            throw new HttpException(error.message, error.code)
+
+        }
+
     }
 
 }

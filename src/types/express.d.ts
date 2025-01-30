@@ -4,9 +4,9 @@ declare module 'express' {
     export interface Request {
         user?: {
             id;
-            role: string;
             username: string;
             email: string;
+            role: string;
         };
     }
 }

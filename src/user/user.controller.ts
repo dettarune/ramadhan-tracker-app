@@ -64,12 +64,21 @@ export class UserController {
 
 
     @Get('/me')
+    @UseGuards(AuthGuard) 
     async getInfoMe(
-        @Req() { user }: Request
-    ) {
+        @Req() { user }: Request, //Auto Ngedapetin dia, eh req.user maksudnya
+    ): Promise<any> {
         try {
-           
+    
+        const {username} = user
 
+            const result = await this.userService.getInfoMe(username)
+            console.log(username)
+
+            return {
+                message: `Succes Get ${username}'s Info!`,
+                data: result
+            }
 
         } catch (error) {
             console.log(error)

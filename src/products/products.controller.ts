@@ -20,22 +20,22 @@ export class ProductsController {
 
 
     
-    @Post('')
-    @UseGuards(AuthGuard)
-    async addProduct(@Body() reqProduct: CreateProductDTO, @Req() { user }: Request): Promise<any> {
-        try {
+    // @Post('')
+    // @UseGuards(AuthGuard)
+    // async addProduct(@Body() reqProduct: CreateProductDTO, @Req() { user }: Request): Promise<any> {
+    //     try {
         
-            const { id } = user;
-            const result = await this.productServ.addProduct(reqProduct, parseInt(id))
+    //         const { id } = user;
+    //         const result = await this.productServ.addProduct(reqProduct, parseInt(id))
 
-            return {
-                message: `Succes Add Product ${result.name}!`,
-                data: result
-            }
-        } catch (error) {
-            console.log(error.message)
-        }
-    }
+    //         return {
+    //             message: `Succes Add Product ${result.name}!`,
+    //             data: result
+    //         }
+    //     } catch (error) {
+    //         console.log(error.message)
+    //     }
+    // }
 
     @Patch('/update/:id')
     @UseGuards(AuthGuard)
