@@ -14,7 +14,7 @@ Endpoint : POST /api/users
 }
 ```
 
-# Response Body (Success) : 
+### Response Body (Success) : 
 
 ```json
 {
@@ -22,7 +22,7 @@ Endpoint : POST /api/users
 }
 ```
 
-# Response Body (Failed) :
+### Response Body (Failed) :
 
 ```json
 {
@@ -43,7 +43,7 @@ Request Body :
 }
 ```
 
-# Response Body (Success) :
+### Response Body (Success) :
 
 header: 'email'
 ```json
@@ -53,7 +53,7 @@ header: 'email'
 }
 ```
 
-# Response Body (Failed) :
+### Response Body (Failed) :
 
 ```json
 {
@@ -65,7 +65,7 @@ header: 'email'
 
 Endpoint: POST /api/users/verify
 
-Request Body :
+### Request Body :
 
 ```json
 {
@@ -73,7 +73,7 @@ Request Body :
 }
 ```
 
-# Response Body (Succes): 
+### Response Body (Succes): 
 
 Return Cookies key:"Authorization" val:"jwtTokenSession"
 ```json
@@ -82,7 +82,7 @@ Return Cookies key:"Authorization" val:"jwtTokenSession"
 }
 ```
 
-# Response Body (Failed): 
+### Response Body (Failed): 
 
 ```json
 {
@@ -95,11 +95,11 @@ Return Cookies key:"Authorization" val:"jwtTokenSession"
 
 Endpoint : GET /api/users/me
 
-# Request (Cookies)
+### Request (Cookies)
 Cookies :
 - Authorization: jwtToken (ini auto ngirim biasanya)
 
-# Response Body (Success) :
+### Response Body (Success) :
 
 ```json
 {
@@ -118,7 +118,7 @@ Cookies :
 }
 ```
 
-# Response Body (Failed) :
+### Response Body (Failed) :
 
 ```json
 {
@@ -131,11 +131,11 @@ Cookies :
 
 Endpoint : DELETE /api/users/me
 
-# Request
+### Request
 Cookie :
 - Authorization: jwtToken (biasanya auto dikirim klo dah login)
 
-# Response Body (Success) :
+### Response Body (Success) :
 
 clearCookie key:"Authorization"
 ```json
@@ -144,7 +144,7 @@ clearCookie key:"Authorization"
 }
 ```
 
-# Response Body (Failed) 
+### Response Body (Failed) 
 
 ```json
 {
