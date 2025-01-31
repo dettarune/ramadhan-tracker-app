@@ -72,6 +72,7 @@ export class UserController {
         const {username} = user
 
             const result = await this.userService.getInfoMe(username)
+            
             console.log(username)
 
             return {
