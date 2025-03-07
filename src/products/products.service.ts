@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
-import { CreateProductDTO, updateProductDTO } from './DTO/products.dto';
+import { CreateProductDTO, updateProductDTO } from '../dto/products.dto';
 
 @Injectable()
 export class ProductsService {

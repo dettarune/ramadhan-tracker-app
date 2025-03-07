@@ -2,7 +2,7 @@ import { Body, Controller, Delete, HttpException, HttpStatus, Param, Patch, Post
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
-import { CreateProductDTO, updateProductDTO } from './DTO/products.dto';
+import { CreateProductDTO, updateProductDTO } from '../dto/products.dto';
 import { ProductsService } from './products.service';
 import { AuthGuard } from 'src/guard/user/user.guard';
 import { Request } from 'express';
