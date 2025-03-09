@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
+import { updateProductDTO } from 'src/dto/products.dto';
 import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/dto/user.dto';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RedisService } from 'src/redis/redis.service';
-import { v4 as uuidv4 } from 'uuid';
-import { http } from 'winston';
+import { randomInt } from 'crypto';
+
 
 @Injectable()
 export class UserService {
@@ -48,7 +49,7 @@ export class UserService {
                 throw new HttpException(errorMessage, errorCode);
             }
 
-            const token = uuidv4().replace(/\D/g, '').slice(0, 6)
+            const token = randomInt(100000, 999999).toString(); 
 
             const user = await this.prismaServ.user.create({
                 data: {
@@ -80,7 +81,7 @@ export class UserService {
     async login(req: LoginUserDTO) {
 
         try {
-            const token = await uuidv4().replace(/\D/g, '').slice(0, 6)
+            const verifCode = randomInt(100000, 999999).toString()
             const user = await this.prismaServ.user.findFirst({
                 where: { username: req.username },
                 select: { username: true, password: true, email: true, role: true, id: true }
@@ -92,10 +93,10 @@ export class UserService {
                 throw new HttpException(`Username or password is incorrect`, 404);
 
 
-            await this.mailerService.sendMail(user.email, `${user.username}, KODE RECOVERY SEKALI PAKAI`, token)
+            await this.mailerService.sendMail(user.email, `${user.username}, KODE RECOVERY SEKALI PAKAI`, verifCode)
 
             //redis more info to verify
-            await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
+            await this.redisService.setTTL(`verif-code-${user.email}`, verifCode, 5 * 60 * 1000)
             await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
             await this.redisService.setTTL(`role-${user.email}`, user.role, 5 * 60 * 1000)
             await this.redisService.setTTL(`id-${user.email}`, user.id, 5 * 60 * 1000)
@@ -113,85 +114,7 @@ export class UserService {
 
     }
 
-    async getInfoMe(username: any) {
-
-        try {
-
-            const user = await this.prismaServ.user.findUnique({
-                where: { username },
-            })
-
-            if (!user)
-                throw new HttpException(`User Not Found`, 404)
-
-            const createdAt = new Date(user.created_at);
-            const now = new Date();
-
-            const usia = now.getTime() - createdAt.getTime();
-
-            const usiaAkun = Math.floor(usia / (1000 * 60 * 60 * 24));
-
-            return { user, usiaAkun: usiaAkun };
-        } catch (error) {
-            console.error(error.message)
-            throw new HttpException(error.message, error.code)
-        }
-
-    }
-
-    // async updateUser(reqProduct: updateProductDTO, id: number): Promise<any> {
-    //         try {
-    //             const product = await this.prismaServ.products.update({
-    //                 where: { id: id },
-    //                 data: {
-    //                     ...reqProduct,
-    //                     updated_at: new Date()
-    //                 }
-    //             });
-
-    //             if (!product)
-    //                 throw new HttpException(`Product Not Found`, 404)
-
-    //             console.log(product)
-
-    //             return product
-    //         } catch (error) {
-    //             console.log(error.message);
-    //             throw new HttpException(error.message, error.code)
-
-    //         }
-    //     }
-
-    async recovery(req: emailDTO) {
-
-        try {
-
-            const findEmail = await this.prismaServ.user.findFirst({
-                where: { email: req.email },
-                select: { email: true }
-            })
-
-            if (!findEmail) {
-                throw new HttpException(`Email Not Found in our databases`, 404)
-            }
-
-            const token = await uuidv4().replace(/\D/g, '').slice(0, 6)
-
-            await this.mailerService.sendMail(req.email, `${req.email}, KODE RECOVERY SEKALI PAKAI`, token)
-
-
-            this.redisService.setTTL(`recovery-code-${req.email}`, token, 5 * 60 * 1000)
-
-            return {
-                message: `Succes Send Recovery Token To: ${req.email}`
-            }
-        } catch (error) {
-            console.error(error.message)
-            throw new HttpException(error.message, error.code)
-
-        }
-    }
-
+    
 
     async verify(email: emailDTO, token: verifyTokenDTO) {
         try {
@@ -200,6 +123,9 @@ export class UserService {
             const role = await this.redisService.get(`role-${email}`)
             const id = await this.redisService.get(`id-${email}`)
 
+            if (!verifCode) {
+                throw new HttpException(`Token expired, please request a new one`, 410);
+            }
 
             if (!token)
                 throw new HttpException(`User Not Found`, 404)
@@ -228,10 +154,90 @@ export class UserService {
 
     }
 
-    async logOut(reqUser: any): Promise<any> {
+    
+    async recovery(req: emailDTO) {
+        
+        try {
+            
+            const findEmail = await this.prismaServ.user.findFirst({
+                where: { email: req.email },
+                select: { email: true }
+            })
+            
+            if (!findEmail) {
+                throw new HttpException(`Email Not Found in our databases`, 404)
+            }
+            
+            const token = randomInt(100000, 999999).toString(); 
+            await this.mailerService.sendMail(req.email, `${req.email}, KODE RECOVERY SEKALI PAKAI`, token)
+            
+            
+            this.redisService.setTTL(`recovery-code-${req.email}`, token, 5 * 60 * 1000)
+            
+            return {
+                message: `Succes Send Recovery Token To: ${req.email}`
+            }
+        } catch (error) {
+            console.error(error.message)
+            throw new HttpException(error.message, error.code)
+            
+        }
+    }
+    
+    
+    async updatePassword(username: any, reqPassword): Promise<any> {
+        try {
+            const hashedPassword = await bcrypt.hash(reqPassword, 10);
+            const user = await this.prismaServ.user.update({
+                where: { username },
+                data: {
+                    password: hashedPassword
+                }
+            });
+
+            if (reqPassword === user.password)
+                throw new HttpException(`Password telah dipakai sebelumnya, mohon ganti yang lain`, 400)
+
+            
+        } catch (error) {
+            console.log(error.message);
+            throw new HttpException(error.message, error.code)
+
+        }
+    }
+
+
+    async getInfoMe(username: any) {
+
+        try {
+
+            const user = await this.prismaServ.user.findUnique({
+                where: { username },
+            })
+
+            if (!user)
+                throw new HttpException(`User Not Found`, 404)
+
+            const createdAt = new Date(user.created_at);
+            const now = new Date();
+
+            const usia = now.getTime() - createdAt.getTime();
+
+            const usiaAkun = Math.floor(usia / (1000 * 60 * 60 * 24));
+
+            return { user, usiaAkun: usiaAkun };
+        } catch (error) {
+            console.error(error.message)
+            throw new HttpException(error.message, error.code)
+        }
+
+    }
+
+
+    async logOut(username: any): Promise<any> {
         try {
             const user = this.prismaServ.user.findUnique({
-                where: { username: reqUser }, select: { username: true }
+                where: { username: username }, select: { username: true }
             })
 
             if (!user)

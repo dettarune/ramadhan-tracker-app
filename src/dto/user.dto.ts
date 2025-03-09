@@ -12,8 +12,9 @@ export class CreateUserDTO {
     @IsNotEmpty()
     @IsEmail()
     email: string
-    
 }
+
+
 
 export class LoginUserDTO {
     @IsNotEmpty()
@@ -21,8 +22,12 @@ export class LoginUserDTO {
 
     @IsNotEmpty()
     password: string
-
     
+}
+
+export class PasswordDTO {
+    @IsNotEmpty()
+    password: string
 }
 
 export class emailDTO {

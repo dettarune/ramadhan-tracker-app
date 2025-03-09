@@ -1,7 +1,6 @@
 import { Body, Controller, Delete, Get, Headers, HttpCode, HttpException, HttpStatus, Param, Post, Req, Res, UseFilters, UseGuards } from '@nestjs/common';
 import { PersegiPanjang, UserService } from './user.service';
-import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/dto/user.dto';
-import { http } from 'winston';
+import { CreateUserDTO, emailDTO, LoginUserDTO, PasswordDTO, verifyTokenDTO } from 'src/dto/user.dto';
 import { RedisService } from 'src/redis/redis.service';
 import { Request, Response } from 'express';
 import { PassThrough } from 'stream';
@@ -19,27 +18,45 @@ export class UserController {
         private MailerService: MailerService,
         private persegiPanjang: PersegiPanjang,
         private prismaServ: PrismaService
-    ) { }
-
-
-    @Post('')
-    async signUp(
-        @Body() req: CreateUserDTO,
-        @Res({ passthrough: true }) res: Response
-    ) {
-
-        try {
-            res.setHeader('email', req.email)
-            res.status(201)
-            const result = await this.userService.signUp(req)
-            return {
-                message: `Sukses membuat akun dengan username ${result.username}`
-            }
-        } catch (error) {
-            console.error(error.message)
+        ) { }
+        
+        
+        @Post('')
+        async signUp(
+            @Body() req: CreateUserDTO,
+            @Res({ passthrough: true }) res: Response
+        ) {
+            
+            try {
+                res.setHeader('email', req.email)
+                res.status(201)
+                const result = await this.userService.signUp(req)
+                return {
+                    message: `Sukses membuat akun dengan username ${result.username}`
+                }
+            } catch (error) {
+                console.error(error.message)
         }
     }
+    
+    
+        @Post('/login')
+        async login(
+            @Body() req: LoginUserDTO,
+            @Res({ passthrough: true }) res: Response
+        ) {
+            try {
+                const result = await this.userService.login(req)
+                res.setHeader('email', result.email)
+                return {
+                    message: `Succes Send Verif Token To: ${result.email}, Please Check Your Email`
+                }
+            } catch (error) {
+                console.error(error.messagee)
+            }
+        }
 
+    
     @Post('/verify')
     async verify(
         @Headers('email') email: emailDTO,
@@ -62,18 +79,50 @@ export class UserController {
     }
 
 
-    @Get('/me')
+    @Post('/recovery')
+    async recovery(
+        @Body() req: emailDTO
+    ) {
+
+        try {
+            const result = this.userService.recovery(req)
+            return {
+                message: `Succes Send Recovery Token To: ${req.email}`
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    @Post('/recovery/password')
+    async updatePassword(
+        @Req() { user }: Request,
+        @Body() req: PasswordDTO,
+    ) {
+
+        try {
+            const {username} = user
+            const result = this.userService.updatePassword(username, req.password)
+            return {
+               message: "Password Telah Berhasil Diupdate!"
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
+    @Get('')
     @UseGuards(AuthGuard) 
     async getInfoMe(
-        @Req() { user }: Request, //Auto Ngedapetin dia, eh req.user maksudnya
+        @Req() { user }: Request, 
     ): Promise<any> {
         try {
     
         const {username} = user
 
             const result = await this.userService.getInfoMe(username)
-            
-            console.log(username)
 
             return {
                 message: `Succes Get ${username}'s Info!`,
@@ -89,7 +138,7 @@ export class UserController {
     }
 
 
-    @Delete('/me')
+    @Delete('')
     @UseGuards(AuthGuard)
     async logOut(
         @Res({ passthrough: true }) res: Response
@@ -108,27 +157,6 @@ export class UserController {
               });
         }
     }
-
-
-    @Post('/login')
-    async login(
-        @Body() req: LoginUserDTO,
-        @Res({ passthrough: true }) res: Response
-    ) {
-        try {
-            const result = await this.userService.login(req)
-            res.setHeader('email', result.email)
-            return {
-                message: `Succes Send Verif Token To: ${result.email}, Please Check Your Email`
-            }
-        } catch (error) {
-            console.error(error.messagee)
-        }
-    }
-
-
-
-
 
 
     @Get('/:id')
@@ -154,20 +182,9 @@ export class UserController {
     }
 
 
-    @Post('/recovery')
-    async recovery(
-        @Body() req: emailDTO
-    ) {
+    
 
-        try {
-            const result = this.userService.recovery(req)
-            return {
-                message: `Succes Send Recovery Token To: ${req.email}`
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    }
+
 
 
 
