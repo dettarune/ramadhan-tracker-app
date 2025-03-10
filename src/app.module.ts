@@ -11,6 +11,7 @@ import { RedisModule } from './redis/redis.module';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ProductsService } from './products/products.service';
 import { ProductsController } from './products/products.controller';
+import { AuthService } from './auth/auth.service';
 
 
 @Global()
@@ -33,6 +34,6 @@ import { ProductsController } from './products/products.controller';
   }),
   ],
   controllers: [ProductsController],
-  providers: [UserService, PrismaService, MailerService, RedisService,JwtService, ProductsService],
+  providers: [UserService, PrismaService, MailerService, RedisService,JwtService, ProductsService, AuthService],
 })
 export class AppModule {}

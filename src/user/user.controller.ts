@@ -7,7 +7,7 @@ import { PassThrough } from 'stream';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { HttpExceptionFilter } from 'src/error/error.filters';
-import { AuthGuard } from 'src/guard/user/user.guard';
+import { AuthGuard } from 'src/auth/user.guard';
 
 @Controller('/api/users/')
 @UseFilters(HttpExceptionFilter)
