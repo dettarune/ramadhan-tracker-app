@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt'
-import { updateProductDTO } from 'src/dto/products.dto';
 import { CreateUserDTO, emailDTO, LoginUserDTO, verifyTokenDTO } from 'src/dto/user.dto';
 import { MailerService } from 'src/nodemailer/nodemailer.service';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -137,16 +136,14 @@ export class UserService {
             const role = await this.redisService.get(`role-${email}`)
             const id = await this.redisService.get(`id-${email}`)
 
-            if (!verifCode) {
-                throw new HttpException(`Token expired, please request a new one`, 410);
-            }
+            
 
-            if (!token)
-                throw new HttpException(`User Not Found`, 404)
+            // if (!token)
+            //     throw new HttpException(`User Not Found`, 404)
 
 
-            if (token.token !== verifCode)
-                throw new HttpException(`Token Invalid`, 410)
+            // if (token.token != verifCode)
+            //     throw new HttpException(`Token Invalid`, 410)
 
 
             const jwtToken = await this.jwtService.sign(
