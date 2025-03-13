@@ -24,35 +24,70 @@ model User {
   created_at  DateTime      @default(now())
   updated_at  DateTime      @default(now())
   role        String?       @default("wargaSipil")
-  transaction Transaction[]
-  product     Products[]
+  sholat_tracker Sholat[]
+  tadarus_tracker     Tadarus[]
+  puasa_trakcer Puasa[]
+  ceramah_tracker Ceramah[]
 
   @@map("user")
 }
 
-model Transaction {
+model Sholat {
   id        Int      @id @default(autoincrement())
-  user_id   Int
-  amount    Decimal  @db.Decimal(10, 2)
+  date String
+  subuh Boolean
+  dzuhur Boolean
+  ashar Boolean
+  maghrib Boolean
+  isya Boolean
+  tarawih Boolean
+  notes String?
   userId    Int?
   timestamp DateTime @default(now())
   User      User?    @relation(fields: [userId], references: [id])
 
-  @@map("transaction")
+  @@map("sholat_tracker")
 }
 
-model Products {
+model Tadarus {
   id          Int       @id @default(autoincrement())
-  name        String
-  description String
-  price       Decimal@db.Decimal(10, 2)
-  stock       Int
-  image       String?
+  date String
+  surah String
+  ayat String
   userId      Int?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime?
+  notes String?
+
 
   User User? @relation(fields: [userId], references: [id])
 
-  @@map("Products")
+  @@map("tadarus_tracker")
+}
+
+model Puasa {
+  id          Int       @id @default(autoincrement())
+  date String
+  tanggal String
+  isFasting Boolean
+  notes String?
+  userId      Int?
+
+  User User? @relation(fields: [userId], references: [id])
+
+    @@map("puasa_trakcer")
+}
+
+model Ceramah {
+  id          Int       @id @default(autoincrement())
+  date String
+  waktu String
+  pembicara String
+  judul String
+  uraian String
+  notes String?
+    userId      Int?
+
+
+  User User? @relation(fields: [userId], references: [id])
+
+    @@map("ceramah_tracker")
 }

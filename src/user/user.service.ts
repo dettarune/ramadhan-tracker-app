@@ -49,7 +49,7 @@ export class UserService {
                 throw new HttpException(errorMessage, errorCode);
             }
 
-            const token = randomInt(100000, 999999).toString(); 
+            const verifCode = randomInt(100000, 999999).toString(); 
 
             const user = await this.prismaServ.user.create({
                 data: {
@@ -59,13 +59,20 @@ export class UserService {
                 }
             })
 
-            await this.mailerService.sendMail(user.email, `${user.email}, KODE RECOVERY SEKALI PAKAI`, token)
+            await this.mailerService.sendMail(user.email, `${user.email}, KODE RECOVERY SEKALI PAKAI`, verifCode)
 
-            await this.redisService.setTTL(`verif-code-${user.email}`, token, 5 * 60 * 1000)
-            await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
-            await this.redisService.setTTL(`role-${user.email}`, user.role, 5 * 60 * 1000)
-            await this.redisService.setTTL(`id-${user.email}`, user.id, 5 * 60 * 1000)
-
+            const userData = {
+                [`verif-code-${user.email}`]: verifCode,
+                [`username-${user.email}`]: user.username,
+                [`role-${user.email}`]: user.role,
+                [`id-${user.email}`]: user.id,
+              };
+              
+              const ttl = 5 * 60 * 1000;
+              
+              await Promise.all(
+                Object.entries(userData).map(([key, value]) => this.redisService.setTTL(key, value, ttl))
+              )
             return {
                 email: user.email,
                 username: user.username
@@ -95,11 +102,18 @@ export class UserService {
 
             await this.mailerService.sendMail(user.email, `${user.username}, KODE RECOVERY SEKALI PAKAI`, verifCode)
 
-            //redis more info to verify
-            await this.redisService.setTTL(`verif-code-${user.email}`, verifCode, 5 * 60 * 1000)
-            await this.redisService.setTTL(`username-${user.email}`, user.username, 5 * 60 * 1000)
-            await this.redisService.setTTL(`role-${user.email}`, user.role, 5 * 60 * 1000)
-            await this.redisService.setTTL(`id-${user.email}`, user.id, 5 * 60 * 1000)
+            const userData = {
+                [`verif-code-${user.email}`]: verifCode,
+                [`username-${user.email}`]: user.username,
+                [`role-${user.email}`]: user.role,
+                [`id-${user.email}`]: user.id,
+              };
+              
+              const ttl = 5 * 60 * 1000;
+              
+              await Promise.all(
+                Object.entries(userData).map(([key, value]) => this.redisService.setTTL(key, value, ttl))
+              )
 
 
             return {
@@ -132,7 +146,7 @@ export class UserService {
 
 
             if (token.token !== verifCode)
-                throw new HttpException(`Token Invalid`, 401)
+                throw new HttpException(`Token Invalid`, 410)
 
 
             const jwtToken = await this.jwtService.sign(
