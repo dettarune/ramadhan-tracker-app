@@ -26,7 +26,7 @@ model User {
   role        String?       @default("wargaSipil")
   sholat_tracker Sholat[]
   tadarus_tracker     Tadarus[]
-  puasa_trakcer Puasa[]
+  puasa_tracker Puasa[]
   ceramah_tracker Ceramah[]
 
   @@map("user")
@@ -66,9 +66,8 @@ model Tadarus {
 model Puasa {
   id          Int       @id @default(autoincrement())
   date String
-  tanggal String
   isFasting Boolean
-  notes String?
+  notes String
   userId      Int?
 
   User User? @relation(fields: [userId], references: [id])
@@ -79,12 +78,11 @@ model Puasa {
 model Ceramah {
   id          Int       @id @default(autoincrement())
   date String
-  waktu String
   pembicara String
   judul String
   uraian String
   notes String?
-    userId      Int?
+  userId      Int?
 
 
   User User? @relation(fields: [userId], references: [id])
